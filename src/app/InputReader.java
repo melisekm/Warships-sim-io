@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 public class InputReader {
-	Scanner sc = new Scanner(System.in);
+	static Scanner sc = new Scanner(System.in);
 
 	public String login() {
 		String option;
@@ -16,5 +16,11 @@ public class InputReader {
 			}
 		}
 		return option;
+	}
+
+	public static String getInput(String prompt) {
+		System.out.println(prompt);
+		String sprava = sc.nextLine();
+		return sprava;
 	}
 }
