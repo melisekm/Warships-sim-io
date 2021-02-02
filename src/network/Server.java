@@ -15,16 +15,16 @@ public class Server extends Node {
 	public ExecutorService executor = Executors.newCachedThreadPool();
 
 	public Server(int port) throws IOException {
-		this.serverSocket = new ServerSocket(port);
+		this.serverSocket = new ServerSocket(port);//inicializacia server soketu na ktorom pocuva
 		System.out.println("Som server");
 	}
 
-	public void initGame() throws IOException {
+	public void initGame() throws IOException { // v cykle cakam na klientov
 		while (connectedPlayers != 2) {
 			Socket client = null;
 			try {
-				client = this.serverSocket.accept();
-				this.initClient(client);
+				client = this.serverSocket.accept(); // klient sa pripojil
+				this.initClient(client); // vytvor spojenie a cakaj na board
 				this.connectedPlayers++;
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -37,7 +37,7 @@ public class Server extends Node {
 	public void initClient(Socket sock) throws IOException {
 		System.out.println("client connected");
 		PlayerConnection newPlayer = new PlayerConnection(this, sock);
-		this.executor.execute(newPlayer);
+		this.executor.execute(newPlayer); // vytvori thread a spusti run metodu
 	}
 
 	public void createBoard(Socket sock, String board) {

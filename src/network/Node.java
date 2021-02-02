@@ -7,7 +7,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class Node {
-		
+	// nepotrebne?
 	public void sendMessage(Socket socket, PrintWriter out, String message) throws IOException {
 		out.println(message);
 		out.flush();

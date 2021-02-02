@@ -32,7 +32,7 @@ public class PlayerConnection implements Runnable {
 	}
 	
 	public void closeConnection() throws IOException {
-		if(!this.socket.isClosed())
+		if(!this.socket.isClosed()) // ak este nebol zavrety tak ho zavrie
 			this.socket.close();
 	}
 
@@ -56,7 +56,7 @@ public class PlayerConnection implements Runnable {
 			}
 		}
 
-		try {
+		try { // loop bol breaknuty alebo niekto ukoncil spojenie ukoncil spojenie
 			System.out.println("Zatvaram spojenie.");
             this.closeConnection();
 		} catch (IOException e) {
