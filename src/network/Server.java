@@ -11,8 +11,8 @@ public class Server extends Node {
 	private Socket clientOneSocket;
 	private Socket clientTwoSocket;
 	private int connectedPlayers = 0;
-	
-	private ExecutorService executor = Executors.newCachedThreadPool();
+
+	public ExecutorService executor = Executors.newCachedThreadPool();
 
 	public Server(int port) throws IOException {
 		this.serverSocket = new ServerSocket(port);
@@ -21,16 +21,17 @@ public class Server extends Node {
 
 	public void initGame() throws IOException {
 		while (connectedPlayers != 2) {
-		    Socket client = null;
-		    try {
-		        client = this.serverSocket.accept();
-		        this.initClient(client);
-		        this.connectedPlayers++;
-		    } catch (IOException e) {
-		        e.printStackTrace();
-		    }
+			Socket client = null;
+			try {
+				client = this.serverSocket.accept();
+				this.initClient(client);
+				this.connectedPlayers++;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		System.out.println("Pripojili sa dvaja hraci.");
+
 	}
 
 	public void initClient(Socket sock) throws IOException {
@@ -38,15 +39,19 @@ public class Server extends Node {
 		PlayerConnection newPlayer = new PlayerConnection(this, sock);
 		this.executor.execute(newPlayer);
 	}
-	
+
 	public void createBoard(Socket sock, String board) {
-		if(sock.equals(this.clientOneSocket)) {
+		System.out.println("Obrdzal board.");
+		if (clientOneSocket == null) {
 			System.out.println("Player 1 Board:");
+			this.clientOneSocket = sock;
 			// TODO board for p1
-		} else if(sock.equals(this.clientTwoSocket)){
+		} else {
+			this.clientTwoSocket = sock;
 			System.out.println("Player 2 Board:");
 			// TODO board for p2
 		}
+
 		System.out.println("Board: " + board);
 
 	}
@@ -74,6 +79,5 @@ public class Server extends Node {
 	public void setClientTwoSocket(Socket clientTwoSocket) {
 		this.clientTwoSocket = clientTwoSocket;
 	}
-	
-	
+
 }

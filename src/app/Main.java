@@ -20,6 +20,7 @@ public class Main {
 			} else if (login.equals("s")) {
 				Server server = new Server(port);
 				server.initGame();
+				server.executor.shutdown();
 			}
 		}catch(UnknownHostException e) {
 			System.out.println("Nespravne zadana IP.");

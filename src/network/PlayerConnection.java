@@ -20,6 +20,7 @@ public class PlayerConnection implements Runnable {
 			socket.setSoTimeout(0);
 			socket.setKeepAlive(true);
 		} catch (SocketException e) {
+			e.printStackTrace();
 		}
 
 		this.parent = parent;
@@ -51,6 +52,7 @@ public class PlayerConnection implements Runnable {
 				// handle event and inform Server
 				}
 			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 
@@ -58,6 +60,7 @@ public class PlayerConnection implements Runnable {
 			System.out.println("Zatvaram spojenie.");
             this.closeConnection();
 		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	
