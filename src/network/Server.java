@@ -26,7 +26,7 @@ public class Server extends Node {
 
 	public void initGame() throws IOException { // v cykle cakam na klientov
 		while (connectedPlayers != 2) {
-			Socket client = null;
+			Socket client;
 			try {
 				client = this.serverSocket.accept(); // klient sa pripojil
 				this.initClient(client); // vytvor spojenie a cakaj na board
@@ -66,8 +66,8 @@ public class Server extends Node {
 	public void performAction(PlayerConnection p, String coordinates) throws IOException {
 		String origin;
 		String destination;
-		PlayerConnection origPC = null;
-		PlayerConnection destPC = null;
+		PlayerConnection origPC;
+		PlayerConnection destPC;
 		if (p == p1Con) {
 			origPC = p1Con;
 			destPC = p2Con;

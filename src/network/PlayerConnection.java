@@ -81,23 +81,14 @@ public class PlayerConnection implements Runnable {
 			((Server) parent).performAction(this, msg);
 			break;
 		case Constants.TARGET_HIT:
-			System.out.println(msg);
+			case Constants.SHIP_HIT:
+			case Constants.TARGET_MISS:
+			case Constants.SHIP_MISS:
+				System.out.println(msg);
 			((Client) parent).updateBoard(msg);
 			break;
-		case Constants.SHIP_HIT:
-			System.out.println(msg);
-			((Client) parent).updateBoard(msg);
-			break;
-		case Constants.TARGET_MISS:
-			System.out.println(msg);
-			((Client) parent).updateBoard(msg);
-			break;
-		case Constants.SHIP_MISS:
-			System.out.println(msg);
-			((Client) parent).updateBoard(msg);
-			break;
-			// TODO v tychto case-och getnut tu suradnicu 
-			//pre hraca na ktoreho sa striela aby to mohol aktualizovat 
+			// TODO v tychto case-och getnut tu suradnicu
+			//pre hraca na ktoreho sa striela aby to mohol aktualizovat
 		}
 	}
 

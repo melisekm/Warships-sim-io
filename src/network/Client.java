@@ -2,7 +2,6 @@ package network;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -22,7 +21,7 @@ public class Client extends Node {
 		System.out.println("Som Client");
 	}
 
-	public void initConnection(String ip, int port) throws UnknownHostException, IOException {
+	public void initConnection(String ip, int port) throws IOException {
 		this.socket = new Socket(ip, port); // inicializacia soketu IP servera a port na akom pocuva
 		this.serverConnection = new PlayerConnection(this, this.socket);
 		this.executor.execute(serverConnection); // vytvori thread a spusti run metodu
