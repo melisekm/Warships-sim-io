@@ -15,6 +15,7 @@ public class Game implements Serializable {
 	}
 
 	public Board createEmptyBoard() {
+		//TODO iny konstruktor eventualne
 		return new Board();
 	}
 

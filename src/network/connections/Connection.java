@@ -13,19 +13,17 @@ import network.nodes.Node;
 import network.messages.Message;
 
 public abstract class Connection implements Runnable {
-    Node parent;
     Socket socket;
     public ObjectInputStream in;
     public ObjectOutputStream out;
 
-    protected Connection(Node parent, Socket socket) throws IOException {
+    protected Connection(Socket socket) throws IOException {
         try {
             socket.setSoTimeout(0);
             socket.setKeepAlive(true);
         } catch (SocketException e) {
             // e.printStackTrace();
         }
-        this.parent = parent;
         this.socket = socket;
 
         this.out = new ObjectOutputStream(this.socket.getOutputStream());

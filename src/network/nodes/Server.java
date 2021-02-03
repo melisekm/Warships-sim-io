@@ -20,14 +20,19 @@ public class Server extends Node {
     private ArrayList<PlayerConnection> playerConnections;
 
     public ExecutorService executor = Executors.newCachedThreadPool();
+    private Boolean shutdown = false;
 
     public Server(int port) throws IOException {
         this.serverSocket = new ServerSocket(port);// inicializacia server soketu na ktorom pocuva
         System.out.println("Som server");
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            this.shutdown = true; // assuming we have a gameScores object in this scope
+            System.out.println("Vypinam server");
+        }));
     }
 
     public void handleConnections() throws IOException { // v cykle cakam na klientov
-        while (true) {
+        while (!this.shutdown) {
             try {
                 Socket client = this.serverSocket.accept(); // klient sa pripojil
                 this.initClient(client); // vytvor spojenie a cakaj na board
@@ -35,6 +40,8 @@ public class Server extends Node {
                 e.printStackTrace();
             }
         }
+        System.out.println("test");
+        //this.closeAllConections();
     }
 
     public void initClient(Socket sock) throws IOException {
@@ -42,20 +49,26 @@ public class Server extends Node {
         PlayerConnection newPlayer = new PlayerConnection(this, sock);
         this.playerConnections.add(newPlayer);
         this.executor.execute(newPlayer); // vytvori thread a spusti run metodu
+        this.sendGameList(newPlayer);
     }
 
     public void sendGameList(PlayerConnection dest) throws IOException {
-        ArrayList<Integer> ids = new ArrayList<Integer>();
+        String msg = "";
         for (Game game : this.games) {
-            ids.add(game.getId());
+            msg += game.getId() + "\n";
         }
-        this.sendGameList(dest, NetworkConstants.GAMELIST, ids);
+        this.sendSimpleMsg(dest, NetworkConstants.GAMELIST, msg);
     }
-    public void assignPlayerToGame(int gameId){
+    public void assignPlayerToGame(PlayerConnection dest, int gameId){
+        Boolean found = false;
         for(Game game : this.games){
             if(game.getId() == gameId && game.getPlayersConnected() < 2){
-
+                found = true;
+                game.setP1Board(new Board(5,5));
             }
+        }
+        if(found){
+            this.sendSimpleMsg(dest, NetworkConstants.REQ_BOARD, "Vyplnte hraciu plochu lodami")
         }
 
     }

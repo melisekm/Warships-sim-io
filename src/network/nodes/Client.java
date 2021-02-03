@@ -29,7 +29,6 @@ public class Client extends Node {
         this.socket = new Socket(ip, port); // inicializacia soketu IP servera a port na akom pocuva
         this.serverConnection = new ServerConnection(this, this.socket);
         this.executor.execute(serverConnection); // vytvori thread a spusti run metodu
-        this.requestGameList();
         //this.playGame();
     }
 
@@ -39,36 +38,47 @@ public class Client extends Node {
         this.sendSimpleMsg(this.serverConnection, type, msg);
     }
 
-    public void chooseGame(ArrayList<Integer> gameList) throws IOException {
+    public void chooseGame(String gameList) throws IOException {
         Integer gameId = 1;
-        if (!gameList.isEmpty()) {
-            this.showGameList(gameList);
-            gameId = this.getGameId(gameList);
+        if (gameList.isEmpty()) {
+            System.out.println("Ziadne hry niesu k dispozicii.");
+            System.out.println("Vytvaram novu.");
+        } else {
+            System.out.println(gameList);
+            String[] list = gameList.split("\\n");
+            gameId = this.getGameId(list);
         }
 
         this.game = new Game(gameId);
         this.sendSimpleMsg(this.serverConnection, NetworkConstants.GAME_ID, gameId.toString());
     }
 
-    public void showGameList(ArrayList<Integer> gamelist){
-        String output = "";
-        for (Integer i : gamelist) {
-            output += i + "\n";
-        }
-        System.out.println(output);
-    }
-
-    public Integer getGameId(ArrayList<Integer> gameList){
-        Integer gameId;
+    public Integer getGameId(String[] list) {
+        Integer gameId = 1;
         while (true) {
             gameId = Integer.parseInt(InputReader.getInput("Zadajte id hry."));
-            for (Integer i : gameList) {
-                if (i.equals(gameId)) {
+            for (String game : list) {
+                if (game.equals(gameId)) {
                     return gameId;
                 }
             }
         }
     }
+
+    public void sendBoard() {
+        // TODO vyplnit suradnice lodi
+        Board playerBoard = this.getBoard();
+        this.game.setP1Board(playerBoard);
+        this.game.setP2Board(this.game.createEmptyBoard());
+        this.sendSimpleMsg(serverConnection, NetworkConstants.BOARD, this.constructBoard(playerBoard));
+
+    }
+
+    public Board getBoard() {
+        // TODO get data from input reader// file// recv from server if game is in progress
+        return this.game.createEmptyBoard();
+    }
+
 
     public void playGame() throws IOException {
         Board playerBoard = this.getBoard();
@@ -100,10 +110,6 @@ public class Client extends Node {
         //TODO game - update stuff
     }
 
-    public Board getBoard() {
-        // TODO get data from input reader// file// recv from server if game is in progress
-        return new Board();
-    }
 
     public void closeConnection() throws IOException {
         if (!this.socket.isClosed()) {

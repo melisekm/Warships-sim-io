@@ -12,21 +12,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ServerConnection extends Connection {
-    public ServerConnection(Node parent, Socket socket) throws IOException {
-        super(parent, socket);
+    Client parent;
+
+    public ServerConnection(Client parent, Socket socket) throws IOException {
+        super(socket);
+        this.parent = parent;
     }
 
     public void recvMessage() throws IOException, ClassNotFoundException {
         List<Message> recvdList = super.unpackMsg();
         int type = recvdList.get(0).getType();
-//        String msg = recvdList.get(0).getMsg();
+        String msg = recvdList.get(0).getMsg();
         switch (type) {
             case NetworkConstants.INFO:
-//                System.out.println(msg);
+                System.out.println(msg);
             case NetworkConstants.GAMELIST:
-                ArrayList<Integer> gamelist = ((GameListMessage) recvdList).getGameList();
-                ((Client) this.parent).chooseGame(gamelist);
+                this.parent.chooseGame(msg);
                 break;
+            case NetworkConstants.REQ_BOARD:
+                this.parent.sendBoard();
 
             // TODO v tychto case-och getnut tu suradnicu
             //pre hraca na ktoreho sa striela aby to mohol aktualizovat
