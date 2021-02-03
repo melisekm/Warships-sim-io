@@ -3,8 +3,8 @@ package app;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
-import network.Client;
-import network.Server;
+import network.nodes.Client;
+import network.nodes.Server;
 
 public class Main {
 
@@ -20,14 +20,13 @@ public class Main {
                 client.initConnection(ip, port);
             } else if (login.equals("s")) {
                 Server server = new Server(port);
-                server.initGame();
+                server.handleConnections();
                 server.executor.shutdown();
             }
         } catch (UnknownHostException e) {
             System.out.println("Nespravne zadana IP.");
             e.printStackTrace();
         } catch (IOException e) {
-            System.out.println("IO error");
             e.printStackTrace();
         }
 

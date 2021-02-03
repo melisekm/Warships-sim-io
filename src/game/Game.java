@@ -1,11 +1,19 @@
 package game;
 
-import app.Constants;
+import constants.NetworkConstants;
 
-public class Game {
+import java.io.Serializable;
+
+public class Game implements Serializable {
+	private final int id;
+	private int playersConnected;
 	private Board p1Board;
 	private Board p2Board;
-	
+
+	public Game(int id) {
+		this.playersConnected = his.id = id;
+	}
+
 	public Board createEmptyBoard() {
 		return new Board();
 	}
@@ -14,7 +22,7 @@ public class Game {
 		System.out.println(origin + " vystrelil na " + destination + " koordinaty: " + coordinates);
 		//TODO do stuff
 		//update stuff
-		return Constants.HIT;
+		return NetworkConstants.HIT;
 	}
 	
 	public Board getP1Board() {
@@ -31,5 +39,17 @@ public class Game {
 
 	public void setP2Board(Board p2Board) {
 		this.p2Board = p2Board;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public int getPlayersConnected() {
+		return playersConnected;
+	}
+
+	public void setPlayersConnected(int playersConnected) {
+		this.playersConnected = playersConnected;
 	}
 }
