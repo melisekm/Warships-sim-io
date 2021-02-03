@@ -1,43 +1,41 @@
 package network;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
-import java.io.PrintWriter;
+import java.io.ObjectOutputStream;
+
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.List;
 
+import app.Constants;
 import game.Board;
 
 public class PlayerConnection implements Runnable {
 
-	Server parent;
-
+	Node parent;
 	Socket socket;
-	BufferedReader in;
-	PrintWriter out;
+	ObjectInputStream in;
+	ObjectOutputStream out;
 
-	protected PlayerConnection(Server parent, Socket socket) throws IOException {
+	protected PlayerConnection(Node parent, Socket socket) throws IOException {
 		try {
 			socket.setSoTimeout(0);
 			socket.setKeepAlive(true);
 		} catch (SocketException e) {
-			e.printStackTrace();
+			// e.printStackTrace();
 		}
 
 		this.parent = parent;
 		this.socket = socket;
-		
-		this.in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
-		this.out = new PrintWriter(this.socket.getOutputStream());
+
+		this.out = new ObjectOutputStream(this.socket.getOutputStream());
+		this.in = new ObjectInputStream(this.socket.getInputStream());
 
 	}
-	
+
 	public void closeConnection() throws IOException {
-		if(!this.socket.isClosed()) // ak este nebol zavrety tak ho zavrie
+		if (!this.socket.isClosed()) // ak este nebol zavrety tak ho zavrie
 			this.socket.close();
 	}
 
@@ -45,20 +43,7 @@ public class PlayerConnection implements Runnable {
 	public void run() {
 		while (!this.socket.isClosed()) {
 			try {
-				String nextEvent = this.in.readLine();
-				if(nextEvent == null) {
-					break;
-				}
-				switch (nextEvent.charAt(0)) {
-				case 'B': // board init
-					Board board = this.recvBoard();
-					parent.createBoard(this, board);
-					break;
-				case 'G': // napr sa pripaja k existujucej hre s boardmi.
-					break;
-				}
-				// handle event and inform Server
-
+				this.recvMessage();
 			} catch (IOException e) {
 				e.printStackTrace();
 				break;
@@ -69,18 +54,61 @@ public class PlayerConnection implements Runnable {
 
 		try { // loop bol breaknuty alebo niekto ukoncil spojenie ukoncil spojenie
 			System.out.println("Zatvaram spojenie.");
-            this.closeConnection();
+			this.closeConnection();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
-	public Board recvBoard() throws IOException, ClassNotFoundException {
-        InputStream inputStream = this.socket.getInputStream();
-        ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
-		List<Board> boardList = (List<Board>) objectInputStream.readObject();
-		System.out.println("Received board from socket.");
-        return boardList.get(0);
+
+	public void recvMessage() throws IOException, ClassNotFoundException {
+		List<Message> recvdList = this.unpackMsg();
+		int type = recvdList.get(0).getType();
+		String msg = recvdList.get(0).getMsg();
+		switch (type) {
+		case Constants.BOARD: // board init
+			Board board = this.recvBoard();
+			((Server) parent).createBoard(this, board);
+			break;
+		case Constants.INFO:
+			System.out.println(msg);
+			break;
+		case Constants.REQ_ACTION: // napr sa pripaja k existujucej hre s boardmi.
+			System.out.println(msg);
+			((Client) parent).performAction();
+			break;
+		case Constants.ATTACK:
+			System.out.println(msg);
+			((Server) parent).performAction(this, msg);
+			break;
+		case Constants.TARGET_HIT:
+			System.out.println(msg);
+			((Client) parent).updateBoard(msg);
+			break;
+		case Constants.SHIP_HIT:
+			System.out.println(msg);
+			((Client) parent).updateBoard(msg);
+			break;
+		case Constants.TARGET_MISS:
+			System.out.println(msg);
+			((Client) parent).updateBoard(msg);
+			break;
+		case Constants.SHIP_MISS:
+			System.out.println(msg);
+			((Client) parent).updateBoard(msg);
+			break;
+			// TODO v tychto case-och getnut tu suradnicu 
+			//pre hraca na ktoreho sa striela aby to mohol aktualizovat 
+		}
 	}
-	
+
+	public List<Message> unpackMsg() throws ClassNotFoundException, IOException {
+		return (List<Message>) this.in.readObject();
+	}
+
+	public Board recvBoard() throws IOException, ClassNotFoundException {
+		List<Board> boardList = (List<Board>) this.in.readObject();
+		System.out.println("Received board from socket.");
+		return boardList.get(0);
+	}
+
 }

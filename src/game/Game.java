@@ -1,20 +1,22 @@
 package game;
 
+import app.Constants;
+
 public class Game {
 	private Board p1Board;
 	private Board p2Board;
-
-	public void printBoard(Board board) {
-		String printedBoard = "";
-		for (char[] row : board.gameBoard) {
-			for (char c : row) {
-				printedBoard += c;
-			}
-			printedBoard += "\n";
-		}
-		System.out.println(printedBoard);
+	
+	public Board createEmptyBoard() {
+		return new Board();
 	}
 
+	public int performAttack(String origin, String destination, String coordinates) {
+		System.out.println(origin + " vystrelil na " + destination + " koordinaty: " + coordinates);
+		//TODO do stuff
+		//update stuff
+		return Constants.HIT;
+	}
+	
 	public Board getP1Board() {
 		return p1Board;
 	}

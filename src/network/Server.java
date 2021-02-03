@@ -6,13 +6,14 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import app.Constants;
 import game.Board;
 import game.Game;
 
 public class Server extends Node {
 	private ServerSocket serverSocket;
-	private Socket p1Socket;
-	private Socket p2Socket;
+	private PlayerConnection p1Con;
+	private PlayerConnection p2Con;
 	private int connectedPlayers = 0;
 	private Game game;
 
@@ -46,20 +47,49 @@ public class Server extends Node {
 
 	public void createBoard(PlayerConnection p, Board board) throws IOException {
 		System.out.println("Obrdzal board.");
-		if (p1Socket == null) {
-			this.p1Socket = p.socket;
+		if (p1Con == null) {
+			this.p1Con = p;
 			this.game = new Game();
 			this.game.setP1Board(board);
 			System.out.println("Player 1 Board:");
-			//this.sendMessage(this.p1Socket, p.out, "Server obdrzal board.");
+			this.sendMessage(this.p1Con, Constants.INFO, "Server obdrzal board. Ste hrac 1, prosim cakajte.");
 		} else {
-			this.p2Socket = p.socket;
+			this.p2Con = p;
 			this.game.setP2Board(board);
 			System.out.println("Player 2 Board:");
-			//this.sendMessage(this.p2Socket, p.out, "Server obdrzal board.");
-			//this.sendMessage(this.p1Socket, p.out, "Pripojil sa druhy hrac.");
+			this.sendMessage(this.p2Con, Constants.INFO, "Hra spustena.Server obdrzal board.");
+			this.sendMessage(this.p1Con, Constants.REQ_ACTION, "Pripojil sa druhy hrac. Hra spustena.");
 		}
-		this.game.printBoard(this.game.getP1Board());
+		board.printBoard();
+	}
+
+	public void performAction(PlayerConnection p, String coordinates) throws IOException {
+		String origin;
+		String destination;
+		PlayerConnection origPC = null;
+		PlayerConnection destPC = null;
+		if (p == p1Con) {
+			origPC = p1Con;
+			destPC = p2Con;
+			origin = "P1";
+			destination = "P2";
+		} else {
+			origPC = p2Con;
+			destPC = p1Con;
+			origin = "P2";
+			destination = "P1";
+		}
+		int signal = this.game.performAttack(origin, destination, coordinates);
+		if (signal == Constants.HIT) { // TODO poslat suradnice pre hraca na ktoreho sa striela aby to mohol aktualizovat.
+			this.sendMessage(origPC, Constants.TARGET_HIT, "Zasiahli ste nepriatelsku lod. " + coordinates);
+			this.sendMessage(destPC, Constants.SHIP_HIT, "Nepriatel zasiahol Vasu lod. " + coordinates);
+		} else if (signal == Constants.MISS) {
+			this.sendMessage(origPC, Constants.TARGET_MISS, "Nezasiahli ste ziadnu lod.. " + coordinates);
+			this.sendMessage(destPC, Constants.SHIP_MISS, "Nepriatel netrafil Vasu lod.. " + coordinates);
+		} else {
+			// TODO koniec hry
+		}
+		this.sendMessage(destPC, Constants.REQ_ACTION, "Ste na rade.");
 	}
 
 	public ServerSocket getServerSocket() {
@@ -68,22 +98,6 @@ public class Server extends Node {
 
 	public void setServerSocket(ServerSocket serverSocket) {
 		this.serverSocket = serverSocket;
-	}
-
-	public Socket getClientOneSocket() {
-		return p1Socket;
-	}
-
-	public void setClientOneSocket(Socket clientOneSocket) {
-		this.p1Socket = clientOneSocket;
-	}
-
-	public Socket getClientTwoSocket() {
-		return p2Socket;
-	}
-
-	public void setClientTwoSocket(Socket clientTwoSocket) {
-		this.p2Socket = clientTwoSocket;
 	}
 
 	public Game getGame() {

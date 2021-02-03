@@ -1,23 +1,22 @@
 package network;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import app.Constants;
 import app.InputReader;
 import game.Board;
+import game.Game;
 
 public class Client extends Node {
+	public ExecutorService executor = Executors.newCachedThreadPool();
 	Socket socket; // socket ktorym komunikujeme so serverom
-	BufferedReader in;
-	PrintWriter out;
-
-	Board playerBoard;
+	PlayerConnection serverConnection;
+	String lastAttack;
+	Game game;
 
 	public Client() {
 		System.out.println("Som Client");
@@ -25,25 +24,43 @@ public class Client extends Node {
 
 	public void initConnection(String ip, int port) throws UnknownHostException, IOException {
 		this.socket = new Socket(ip, port); // inicializacia soketu IP servera a port na akom pocuva
-		this.in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
-		this.out = new PrintWriter(socket.getOutputStream());
+		this.serverConnection = new PlayerConnection(this, this.socket);
+		this.executor.execute(serverConnection); // vytvori thread a spusti run metodu
 		this.playGame();
 	}
 
 	public void playGame() throws IOException {
-		// String message = InputReader.getInput("zadajte board:");
-		this.playerBoard = this.getBoard();
-		this.sendMessage(this.socket, this.out, "B"); // pripojil som sa k novej hre.
-		this.sendBoard(this.playerBoard, this.socket);
-
-		this.closeConnection();
+		Board playerBoard = this.getBoard();
+		this.sendMessage(this.serverConnection, Constants.BOARD, "nova board"); // pripojil som sa k novej hre.
+		this.sendBoard(this.serverConnection, playerBoard);
+		this.game = new Game();
+		this.game.setP1Board(playerBoard);
+		this.game.setP2Board(this.game.createEmptyBoard());
+		/*
+		while(true) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+		        Thread.currentThread().interrupt();
+				e.printStackTrace();
+			}
+		}
+		//this.closeConnection();
+		 */
+	}
+	public void performAction() throws IOException {
+		this.lastAttack = InputReader.getInput("Zadajte Suradnice Utoku");
+		this.sendMessage(this.serverConnection, Constants.ATTACK, this.lastAttack); // pripojil som sa k novej hre.
+	}
+	
+	public void updateBoard(String coordinates) {
+		//TODO game - update stuff
 	}
 
 	public Board getBoard() {
 		// TODO get data from input reader// file// recv from server if game is in progress
-		int rows = 5;
-		int columns = 5;
-		return new Board(rows, columns);
+		return new Board();
 	}
 
 	public void closeConnection() throws IOException {
