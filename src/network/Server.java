@@ -6,16 +6,20 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import game.Board;
+import game.Game;
+
 public class Server extends Node {
 	private ServerSocket serverSocket;
-	private Socket clientOneSocket;
-	private Socket clientTwoSocket;
+	private Socket p1Socket;
+	private Socket p2Socket;
 	private int connectedPlayers = 0;
+	private Game game;
 
 	public ExecutorService executor = Executors.newCachedThreadPool();
 
 	public Server(int port) throws IOException {
-		this.serverSocket = new ServerSocket(port);//inicializacia server soketu na ktorom pocuva
+		this.serverSocket = new ServerSocket(port);// inicializacia server soketu na ktorom pocuva
 		System.out.println("Som server");
 	}
 
@@ -40,20 +44,22 @@ public class Server extends Node {
 		this.executor.execute(newPlayer); // vytvori thread a spusti run metodu
 	}
 
-	public void createBoard(Socket sock, String board) {
+	public void createBoard(PlayerConnection p, Board board) throws IOException {
 		System.out.println("Obrdzal board.");
-		if (clientOneSocket == null) {
+		if (p1Socket == null) {
+			this.p1Socket = p.socket;
+			this.game = new Game();
+			this.game.setP1Board(board);
 			System.out.println("Player 1 Board:");
-			this.clientOneSocket = sock;
-			// TODO board for p1
+			//this.sendMessage(this.p1Socket, p.out, "Server obdrzal board.");
 		} else {
-			this.clientTwoSocket = sock;
+			this.p2Socket = p.socket;
+			this.game.setP2Board(board);
 			System.out.println("Player 2 Board:");
-			// TODO board for p2
+			//this.sendMessage(this.p2Socket, p.out, "Server obdrzal board.");
+			//this.sendMessage(this.p1Socket, p.out, "Pripojil sa druhy hrac.");
 		}
-
-		System.out.println("Board: " + board);
-
+		this.game.printBoard(this.game.getP1Board());
 	}
 
 	public ServerSocket getServerSocket() {
@@ -65,19 +71,27 @@ public class Server extends Node {
 	}
 
 	public Socket getClientOneSocket() {
-		return clientOneSocket;
+		return p1Socket;
 	}
 
 	public void setClientOneSocket(Socket clientOneSocket) {
-		this.clientOneSocket = clientOneSocket;
+		this.p1Socket = clientOneSocket;
 	}
 
 	public Socket getClientTwoSocket() {
-		return clientTwoSocket;
+		return p2Socket;
 	}
 
 	public void setClientTwoSocket(Socket clientTwoSocket) {
-		this.clientTwoSocket = clientTwoSocket;
+		this.p2Socket = clientTwoSocket;
+	}
+
+	public Game getGame() {
+		return game;
+	}
+
+	public void setGame(Game game) {
+		this.game = game;
 	}
 
 }
