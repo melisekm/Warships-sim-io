@@ -17,7 +17,7 @@ public class Main {
         try {
             if (login.equals("c")) {
                 Client client = new Client();
-            client.initConnection(ip, port);
+                client.initConnection(ip, port);
             } else if (login.equals("s")) {
                 Server server = new Server(port);
                 server.initGame();

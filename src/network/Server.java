@@ -57,7 +57,7 @@ public class Server extends Node {
 			this.p2Con = p;
 			this.game.setP2Board(board);
 			System.out.println("Player 2 Board:");
-			this.sendMessage(this.p2Con, Constants.INFO, "Hra spustena.Server obdrzal board.");
+			this.sendMessage(this.p2Con, Constants.INFO, "Hra spustena.Server obdrzal board.Prosim cakajte");
 			this.sendMessage(this.p1Con, Constants.REQ_ACTION, "Pripojil sa druhy hrac. Hra spustena.");
 		}
 		board.printBoard();
