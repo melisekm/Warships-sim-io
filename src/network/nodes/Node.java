@@ -18,8 +18,8 @@ public abstract class Node {
         dest.out.writeObject(dataToSend);
     }
 
-    public void sendGameData(Connection dest, int type, String gameId, String message) throws IOException {
-        Message header = new Message(NetworkConstants.GAMEDATA, gameId);
+    public void sendGameData(Connection dest, int type, String hdrMsg, String message) throws IOException {
+        Message header = new Message(NetworkConstants.GAMEDATA, hdrMsg);
         Message data = new Message(type, message);
         List<Message> dataToSend = new ArrayList<>();
         dataToSend.add(header);

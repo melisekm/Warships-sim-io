@@ -8,5 +8,6 @@ public class NetworkConstants {
 	public final static int CREATE_GAME = 5;
 	public final static int REQ_BOARD = 6;
 	public final static int GAMEDATA = 7;
+	public final static int REQ_ACTION = 8;
 
 }

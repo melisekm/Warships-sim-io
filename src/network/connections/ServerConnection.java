@@ -21,23 +21,36 @@ public class ServerConnection extends Connection {
         List<Message> recvdList = super.unpackMsg();
         int type = recvdList.get(0).getType();
         String recvdData = recvdList.get(0).getMsg();
+        String gameId;
         switch (type) {
             case NetworkConstants.INFO:
                 System.out.println(recvdData);
             case NetworkConstants.GAMELIST:
-                String gameId = this.parent.chooseGame(recvdData);
-                if (gameId != null) {
-                    this.parent.sendSimpleMsg(this, NetworkConstants.GAME_ID, gameId);
+                String id = this.parent.chooseGame(recvdData);
+                if (id != null) {
+                    this.parent.sendSimpleMsg(this, NetworkConstants.GAME_ID, id);
                 } else {
                     this.parent.initGame();
                 }
                 break;
             case NetworkConstants.REQ_BOARD:
                 String board = this.parent.createGame(Integer.parseInt(recvdData));
-                String id = String.valueOf(this.parent.getGame().getId());
-                this.parent.sendGameData(this, GameConstants.BOARD, id, board);
-
-
+                gameId = String.valueOf(this.parent.getGame().getId());
+                this.parent.sendGameData(this, GameConstants.BOARD, gameId, board);
+                break;
+            case NetworkConstants.REQ_ACTION:
+                System.out.println(recvdData);
+                String coordinates = this.parent.performAction();
+                gameId = String.valueOf(this.parent.getGame().getId());
+                this.parent.sendGameData(this, GameConstants.ATTACK, gameId, coordinates);
+                break;
+            case NetworkConstants.GAMEDATA:
+                System.out.println(recvdData);
+                int recvdId = Integer.parseInt(recvdData);
+                int recvdGameType = recvdList.get(1).getType();
+                String recvdGameData = recvdList.get(1).getMsg();
+                this.parent.gameStateUpdate(recvdId, recvdGameType, recvdGameData);
+                break;
                 // TODO v tychto case-och getnut tu suradnicu
                 //pre hraca na ktoreho sa striela aby to mohol aktualizovat
         }

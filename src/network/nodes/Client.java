@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import app.StdInputReader;
+import constants.GameConstants;
 import game.Board;
 import game.Game;
 import constants.NetworkConstants;
@@ -81,6 +82,24 @@ public class Client extends Node {
         String location = "C:\\Users\\melis\\Desktop\\Eclipse workspace\\Warships-sim-io\\test_board\\board1.txt";
         String loadedBoard = this.io.readBoard(location);
         return new Board(loadedBoard);
+    }
+
+    public String performAction(){
+        this.lastAttack = StdInputReader.getInput("Zadajte Suradnice Utoku");
+        return this.lastAttack;
+    }
+
+    public void gameStateUpdate(int gameId, int type, String gameData){
+        switch(type){
+            case GameConstants.TARGET_HIT:
+                break;
+            case GameConstants.SHIP_HIT:
+                break;
+            case GameConstants.TARGET_MISS:
+                break;
+            case GameConstants.SHIP_MISS:
+                break;
+        }
     }
 
     public Game getGame() {

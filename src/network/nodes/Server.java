@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import constants.GameConstants;
+import constants.NetworkConstants;
 import game.Game;
 import network.connections.PlayerConnection;
 
@@ -16,6 +17,7 @@ public class Server extends Node {
     private ServerSocket serverSocket;
     private ArrayList<PlayerConnection> playerConnections;
     private HashMap<Integer, Game> games;
+    private HashMap<Game, ArrayList<PlayerConnection>> connections;
 
     public ExecutorService executor = Executors.newCachedThreadPool();
     private Boolean shutdown = false;
@@ -24,6 +26,7 @@ public class Server extends Node {
         this.serverSocket = new ServerSocket(port);// inicializacia server soketu na ktorom pocuva
         this.games = this.loadGames();
         this.playerConnections = new ArrayList<PlayerConnection>();
+        this.connections = new HashMap<Game, ArrayList<PlayerConnection>>();
         System.out.println("Som server");
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             this.shutdown = true; // assuming we have a gameScores object in this scope
@@ -63,31 +66,79 @@ public class Server extends Node {
         return msg;
     }
 
-    public void assignPlayerToGame(int gameId) {
+    public void assignPlayerToGame(PlayerConnection p, int gameId) {
         Game game = this.games.get(gameId);
         if (game != null && game.getPlayersConnected() < 2) {
             game.setPlayersConnected(game.getPlayersConnected() + 1);
             System.out.println("Hrac bol priradeny do hry; " + gameId);
+            if (game.getPlayersConnected() == 1) {
+                ArrayList<PlayerConnection> gameConnections = new ArrayList<PlayerConnection>();
+                gameConnections.add(p);
+                this.connections.put(game, gameConnections);
+            } else {
+                this.connections.get(game).add(p);
+            }
         } else {
-            System.out.println("Hra s id " + gameId + " neexistuje");
+            System.out.println("Hra s id " + gameId + " neexistuje alebo je plna.");
         }
     }
 
-    public String createGame() {
+    public String createGame(PlayerConnection p) {
         int id = games.size() + 1;
         games.put(id, new Game(id));
+        this.assignPlayerToGame(p, id);
         return String.valueOf(id);
     }
 
-    public void gameStateUpdate(int gameId, int type, String gameData) {
+    public void gameStateUpdate(PlayerConnection p, int gameId, int type, String gameData) throws IOException {
         Game game = this.games.get(gameId);
+        ArrayList<PlayerConnection> players = this.connections.get(game);
         if (game == null) {
             System.out.println("Hra s id " + gameId + " neexistuje.");
             return;
         }
+
         switch (type) {
             case GameConstants.BOARD:
                 game.setBoard(gameData);
+                this.informPlayers(p, players);
+            case GameConstants.ATTACK:
+                PlayerConnection origPC = null;
+                PlayerConnection destPC = null;
+                String origin;
+                String destination;
+                if (players.get(0) == p) {
+                    origPC = players.get(0);
+                    destPC = players.get(1);
+                    origin = "P1";
+                    destination = "P2";
+                } else {
+                    origPC = players.get(1);
+                    destPC = players.get(2);
+                    origin = "P2";
+                    destination = "P1";
+                }
+                int signal = game.performAttack(origin, destination, gameData);
+                if (signal == GameConstants.HIT) {
+                    this.sendGameData(origPC, GameConstants.TARGET_HIT, "Zasiahli ste nepriatelsku lod. + gameData" , gameData);
+                    this.sendGameData(destPC, GameConstants.SHIP_HIT, "Nepriatel zasiahol Vasu lod. " + gameData, gameData);
+                } else if (signal == GameConstants.MISS) {
+                    this.sendGameData(origPC, GameConstants.TARGET_MISS, "Nezasiahli ste ziadnu lod.. " + gameData, gameData);
+                    this.sendGameData(destPC, GameConstants.SHIP_MISS, "Nepriatel netrafil Vasu lod.. " + gameData, gameData);
+                } else {
+                    // TODO koniec hry
+                }
+                this.sendSimpleMsg(destPC, NetworkConstants.REQ_ACTION, "Ste na rade.");
+
+        }
+    }
+
+    public void informPlayers(PlayerConnection origin, ArrayList<PlayerConnection> players) throws IOException {
+        if (players.size() == 1) {
+            this.sendSimpleMsg(players.get(0), NetworkConstants.INFO, "Server obdrzal board. Ste hrac 1, prosim cakajte.");
+        } else {
+            this.sendSimpleMsg(players.get(1), NetworkConstants.INFO, "Hra spustena.Server obdrzal board.");
+            this.sendSimpleMsg(players.get(0), NetworkConstants.REQ_ACTION, "Pripojil sa druhy hrac. Hra spustena.");
         }
     }
 

@@ -6,7 +6,7 @@ public class Message implements Serializable {
     private final int type;
     private final String msg;
 
-    public Message(char type, String msg) {
+    public Message(int type, String msg) {
         this.type = type;
         this.msg = msg;
     }

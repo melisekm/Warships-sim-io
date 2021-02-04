@@ -1,5 +1,6 @@
 package game;
 
+import constants.GameConstants;
 import constants.NetworkConstants;
 
 import java.io.Serializable;
@@ -18,9 +19,16 @@ public class Game implements Serializable {
     public void setBoard(String formattedBoard) {
         if (this.playersConnected == 1) {
             this.p1Board = new Board(formattedBoard);
-//		}else{
+        } else {
             this.p2Board = new Board(formattedBoard);
         }
+    }
+
+    public int performAttack(String origin, String destination, String coordinates) {
+        System.out.println(origin + " vystrelil na " + destination + " koordinaty: " + coordinates);
+        //TODO do stuff
+        //update stuff
+        return GameConstants.HIT;
     }
 
 
