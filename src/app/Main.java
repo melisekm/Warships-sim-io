@@ -10,13 +10,13 @@ public class Main {
 
     public static void main(String[] args) {
         String login = StdInputReader.loopedInput("Server[s]/Client[c]/Quit[q]", "s", "c", "q");
-        System.out.println("cpavok");
         String ip = "localhost";
         int port = 9999;
         try {
             if (login.equals("c")) {
                 Client client = new Client();
                 client.initConnection(ip, port);
+                client.executor.shutdown();
             } else if (login.equals("s")) {
                 Server server = new Server(port);
                 server.handleConnections();

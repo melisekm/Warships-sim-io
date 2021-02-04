@@ -24,21 +24,22 @@ public class Board implements Serializable {
 		char[][] res = new char[temp.length][temp.length];
 		for(int row = 0; row < temp.length; row++){
 			for(int col = 0; col < temp.length; col++){
-				res[col][row] = temp[row].charAt(col);
+				res[col][row] = temp[col].charAt(row);
 			}
 		}
+		this.gameBoard = res;
 	}
 	//TODO dalsi konstruktor dke sa nacita zo suboru napr
 
 	
 	public String getFormattedBoard() {
-		String printedBoard = "";
+		StringBuilder printedBoard = new StringBuilder();
 		for (char[] row : this.gameBoard) {
 			for (char c : row) {
-				printedBoard += c;
+				printedBoard.append(c);
 			}
-			printedBoard += "\n";
+			printedBoard.append('\n');
 		}
-		return printedBoard;
+		return printedBoard.toString();
 	}
 }

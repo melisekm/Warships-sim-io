@@ -29,8 +29,14 @@ public class PlayerConnection extends Connection {
                 this.parent.sendSimpleMsg(this, NetworkConstants.GAMELIST, gameList);
                 break;
             case NetworkConstants.GAME_ID:
-                this.parent.assignPlayerToGame(this, Integer.parseInt(recvdData));
-                this.parent.sendSimpleMsg(this, NetworkConstants.REQ_BOARD, recvdData);
+                int code = this.parent.assignPlayerToGame(this, Integer.parseInt(recvdData));
+                if(code == 0) {
+                    this.parent.sendSimpleMsg(this, NetworkConstants.REQ_BOARD, recvdData);
+                }else if (code == 1){
+                    this.parent.sendSimpleMsg(this, NetworkConstants.ERROR,"Hra neexistuje.");
+                }else if(code == 2){
+                    this.parent.sendSimpleMsg(this, NetworkConstants.ERROR,"Hra je plna.");
+                }
                 break;
             case NetworkConstants.CREATE_GAME:
                 String id = this.parent.createGame(this);
@@ -41,6 +47,9 @@ public class PlayerConnection extends Connection {
                 int recvdGameType = recvdList.get(1).getType();
                 String recvdGameData = recvdList.get(1).getMsg();
                 this.parent.gameStateUpdate(this, recvdId, recvdGameType, recvdGameData);
+                break;
+            default:
+                this.parent.sendSimpleMsg(this, NetworkConstants.ERROR, "Nasta neocakavana chyba, restartujte program.");
         }
     }
 }

@@ -14,32 +14,41 @@ import game.Game;
 import network.connections.PlayerConnection;
 
 public class Server extends Node {
-    private ServerSocket serverSocket;
-    private ArrayList<PlayerConnection> playerConnections;
-    private HashMap<Integer, Game> games;
-    private HashMap<Game, ArrayList<PlayerConnection>> connections;
+    private final ServerSocket serverSocket;
+    private final ArrayList<PlayerConnection> playerConnections;
+    private final HashMap<Integer, Game> games;
+    private final HashMap<Game, ArrayList<PlayerConnection>> connections;
 
     public ExecutorService executor = Executors.newCachedThreadPool();
-    private Boolean shutdown = false;
 
     public Server(int port) throws IOException {
         this.serverSocket = new ServerSocket(port);// inicializacia server soketu na ktorom pocuva
         this.games = this.loadGames();
-        this.playerConnections = new ArrayList<PlayerConnection>();
-        this.connections = new HashMap<Game, ArrayList<PlayerConnection>>();
+        this.playerConnections = new ArrayList<>();
+        this.connections = new HashMap<>();
         System.out.println("Som server");
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            this.shutdown = true; // assuming we have a gameScores object in this scope
+            this.closeAllConections();
             System.out.println("Vypinam server");
         }));
     }
+    public void closeAllConections(){
+        for(PlayerConnection con : playerConnections){
+            try {
+                con.closeConnection();
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("Nepodarilo sa uzatvorit spojenie s " + con.getSocket().toString());
+            }
+        }
+    }
 
     public HashMap<Integer, Game> loadGames() {
-        return new HashMap<Integer, Game>(); // TODO doplnit
+        return new HashMap<>(); // TODO doplnit
     }
 
     public void handleConnections() throws IOException { // v cykle cakam na klientov
-        while (!this.shutdown) {
+        while (true) {
             try {
                 Socket client = this.serverSocket.accept(); // klient sa pripojil
                 this.initClient(client); // vytvor spojenie a cakaj na board
@@ -47,8 +56,6 @@ public class Server extends Node {
                 e.printStackTrace();
             }
         }
-        System.out.println("test");
-        //this.closeAllConections();
     }
 
     public void initClient(Socket sock) throws IOException {
@@ -59,28 +66,33 @@ public class Server extends Node {
     }
 
     public String getFormattedGameList() {
-        String msg = "";
+        StringBuilder msg = new StringBuilder();
         for (Game game : this.games.values()) {
-            msg += game.getId() + "\n";
+            msg.append(game.getId()).append("\n");
         }
-        return msg;
+        return msg.toString();
     }
 
-    public void assignPlayerToGame(PlayerConnection p, int gameId) {
+    public int assignPlayerToGame(PlayerConnection p, int gameId) {
         Game game = this.games.get(gameId);
-        if (game != null && game.getPlayersConnected() < 2) {
-            game.setPlayersConnected(game.getPlayersConnected() + 1);
-            System.out.println("Hrac bol priradeny do hry; " + gameId);
-            if (game.getPlayersConnected() == 1) {
-                ArrayList<PlayerConnection> gameConnections = new ArrayList<PlayerConnection>();
-                gameConnections.add(p);
-                this.connections.put(game, gameConnections);
-            } else {
-                this.connections.get(game).add(p);
-            }
-        } else {
-            System.out.println("Hra s id " + gameId + " neexistuje alebo je plna.");
+        if(game == null){
+            System.out.println("hra s id " + gameId + " neexistuje.");
+            return 1;
         }
+        if (game.getPlayersConnected() >= 2){
+            System.out.println("hra " + gameId + " je plna.");
+            return 2;
+        }
+        game.setPlayersConnected(game.getPlayersConnected() + 1);
+        System.out.println("Hrac bol priradeny do hry; " + gameId);
+        if (game.getPlayersConnected() == 1) {
+            ArrayList<PlayerConnection> gameConnections = new ArrayList<>();
+            gameConnections.add(p);
+            this.connections.put(game, gameConnections);
+        } else {
+            this.connections.get(game).add(p);
+        }
+        return 0;
     }
 
     public String createGame(PlayerConnection p) {
@@ -101,10 +113,11 @@ public class Server extends Node {
         switch (type) {
             case GameConstants.BOARD:
                 game.setBoard(gameData);
-                this.informPlayers(p, players);
+                this.informPlayers(players);
+                break;
             case GameConstants.ATTACK:
-                PlayerConnection origPC = null;
-                PlayerConnection destPC = null;
+                PlayerConnection origPC;
+                PlayerConnection destPC;
                 String origin;
                 String destination;
                 if (players.get(0) == p) {
@@ -114,13 +127,13 @@ public class Server extends Node {
                     destination = "P2";
                 } else {
                     origPC = players.get(1);
-                    destPC = players.get(2);
+                    destPC = players.get(0);
                     origin = "P2";
                     destination = "P1";
                 }
                 int signal = game.performAttack(origin, destination, gameData);
                 if (signal == GameConstants.HIT) {
-                    this.sendGameData(origPC, GameConstants.TARGET_HIT, "Zasiahli ste nepriatelsku lod. + gameData" , gameData);
+                    this.sendGameData(origPC, GameConstants.TARGET_HIT, "Zasiahli ste nepriatelsku lod. " + gameData, gameData);
                     this.sendGameData(destPC, GameConstants.SHIP_HIT, "Nepriatel zasiahol Vasu lod. " + gameData, gameData);
                 } else if (signal == GameConstants.MISS) {
                     this.sendGameData(origPC, GameConstants.TARGET_MISS, "Nezasiahli ste ziadnu lod.. " + gameData, gameData);
@@ -129,11 +142,11 @@ public class Server extends Node {
                     // TODO koniec hry
                 }
                 this.sendSimpleMsg(destPC, NetworkConstants.REQ_ACTION, "Ste na rade.");
-
+                break;
         }
     }
 
-    public void informPlayers(PlayerConnection origin, ArrayList<PlayerConnection> players) throws IOException {
+    public void informPlayers(ArrayList<PlayerConnection> players) throws IOException {
         if (players.size() == 1) {
             this.sendSimpleMsg(players.get(0), NetworkConstants.INFO, "Server obdrzal board. Ste hrac 1, prosim cakajte.");
         } else {
@@ -142,40 +155,4 @@ public class Server extends Node {
         }
     }
 
-//    public void performAction(Connection p, String coordinates) throws IOException {
-//        String origin;
-//        String destination;
-//        Connection origPC;
-//        Connection destPC;
-//        if (p == p1Con) {
-//            origPC = p1Con;
-//            destPC = p2Con;
-//            origin = "P1";
-//            destination = "P2";
-//        } else {
-//            origPC = p2Con;
-//            destPC = p1Con;
-//            origin = "P2";
-//            destination = "P1";
-//        }
-//        int signal = this.game.performAttack(origin, destination, coordinates);
-//        if (signal == GameConstants.HIT) { // TODO poslat suradnice pre hraca na ktoreho sa striela aby to mohol aktualizovat.
-//            this.sendSimpleMsg(origPC, NetworkConstants.TARGET_HIT, "Zasiahli ste nepriatelsku lod. " + coordinates);
-//            this.sendSimpleMsg(destPC, NetworkConstants.SHIP_HIT, "Nepriatel zasiahol Vasu lod. " + coordinates);
-//        } else if (signal == GameConstants.MISS) {
-//            this.sendSimpleMsg(origPC, NetworkConstants.TARGET_MISS, "Nezasiahli ste ziadnu lod.. " + coordinates);
-//            this.sendSimpleMsg(destPC, NetworkConstants.SHIP_MISS, "Nepriatel netrafil Vasu lod.. " + coordinates);
-//        } else {
-//            // TODO koniec hry
-//        }
-//        this.sendSimpleMsg(destPC, NetworkConstants.REQ_ACTION, "Ste na rade.");
-//    }
-
-    public ServerSocket getServerSocket() {
-        return serverSocket;
-    }
-
-    public void setServerSocket(ServerSocket serverSocket) {
-        this.serverSocket = serverSocket;
-    }
 }

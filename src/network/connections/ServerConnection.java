@@ -25,6 +25,7 @@ public class ServerConnection extends Connection {
         switch (type) {
             case NetworkConstants.INFO:
                 System.out.println(recvdData);
+                break;
             case NetworkConstants.GAMELIST:
                 String id = this.parent.chooseGame(recvdData);
                 if (id != null) {
@@ -46,13 +47,16 @@ public class ServerConnection extends Connection {
                 break;
             case NetworkConstants.GAMEDATA:
                 System.out.println(recvdData);
-                int recvdId = Integer.parseInt(recvdData);
                 int recvdGameType = recvdList.get(1).getType();
                 String recvdGameData = recvdList.get(1).getMsg();
-                this.parent.gameStateUpdate(recvdId, recvdGameType, recvdGameData);
+                this.parent.gameStateUpdate(recvdGameType, recvdGameData);
                 break;
                 // TODO v tychto case-och getnut tu suradnicu
                 //pre hraca na ktoreho sa striela aby to mohol aktualizovat
+            case NetworkConstants.ERROR:
+                System.out.println(recvdData);
+                this.parent.initGame();
+                break;
         }
     }
 }

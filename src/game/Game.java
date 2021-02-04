@@ -31,14 +31,6 @@ public class Game implements Serializable {
         return GameConstants.HIT;
     }
 
-
-//	public int performAttack(String origin, String destination, String coordinates) {
-//		System.out.println(origin + " vystrelil na " + destination + " koordinaty: " + coordinates);
-//		//TODO do stuff
-//		//update stuff
-//		return NetworkConstants.HIT;
-//	}
-
     public Board getP1Board() {
         return p1Board;
     }

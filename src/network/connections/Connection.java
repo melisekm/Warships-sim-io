@@ -8,11 +8,10 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.List;
 
-import game.Board;
 import network.messages.Message;
 
 public abstract class Connection implements Runnable {
-    Socket socket;
+    private Socket socket;
     public ObjectInputStream in;
     public ObjectOutputStream out;
 
@@ -37,6 +36,7 @@ public abstract class Connection implements Runnable {
                 this.handleConnection();
             } catch (IOException e) {
                 e.printStackTrace();
+                System.out.println("Socket bol uzatvoreny./Pripadne ina chyba:D");
                 break;
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
@@ -61,10 +61,12 @@ public abstract class Connection implements Runnable {
             this.socket.close();
     }
 
-    public Board recvBoard() throws IOException, ClassNotFoundException {
-        List<Board> boardList = (List<Board>) this.in.readObject();
-        System.out.println("Received board from socket.");
-        return boardList.get(0);
+    public Socket getSocket() {
+        return socket;
+    }
+
+    public void setSocket(Socket socket) {
+        this.socket = socket;
     }
 
 }
