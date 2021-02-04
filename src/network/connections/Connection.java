@@ -9,7 +9,6 @@ import java.net.SocketException;
 import java.util.List;
 
 import game.Board;
-import network.nodes.Node;
 import network.messages.Message;
 
 public abstract class Connection implements Runnable {
@@ -35,7 +34,7 @@ public abstract class Connection implements Runnable {
     public void run() {
         while (!this.socket.isClosed()) {
             try {
-                this.recvMessage();
+                this.handleConnection();
             } catch (IOException e) {
                 e.printStackTrace();
                 break;
@@ -51,7 +50,7 @@ public abstract class Connection implements Runnable {
         }
     }
 
-    protected abstract void recvMessage() throws IOException, ClassNotFoundException;
+    public abstract void handleConnection() throws IOException, ClassNotFoundException;
 
     public List<Message> unpackMsg() throws IOException, ClassNotFoundException {
         return (List<Message>) this.in.readObject();

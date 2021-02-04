@@ -9,8 +9,7 @@ import network.nodes.Server;
 public class Main {
 
     public static void main(String[] args) {
-        InputReader in = new InputReader();
-        String login = in.login();
+        String login = StdInputReader.loopedInput("Server[s]/Client[c]/Quit[q]", "s", "c", "q");
         System.out.println("cpavok");
         String ip = "localhost";
         int port = 9999;

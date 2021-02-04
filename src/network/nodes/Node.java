@@ -4,27 +4,27 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import game.Board;
+import app.IOHandler;
+import constants.NetworkConstants;
 import network.connections.Connection;
-import network.messages.GameListMessage;
 import network.messages.Message;
-import network.messages.SimpleMessage;
 
 public abstract class Node {
-    public void sendSimpleMsg(Connection dest, char type, String message) throws IOException {
-        Message msg = new Message(type, message);
-        this.send(dest, msg);
-    }
-    public void send(Connection dest, Message msg) throws IOException {
+    IOHandler io = new IOHandler();
+    public void sendSimpleMsg(Connection dest, int type, String message) throws IOException {
+        Message data = new Message(type, message);
         List<Message> dataToSend = new ArrayList<>();
-        dataToSend.add(msg);
+        dataToSend.add(data);
         dest.out.writeObject(dataToSend);
     }
 
-    public String constructBoard(Board board){
-        String msg = "";
-        
+    public void sendGameData(Connection dest, int type, String gameId, String message) throws IOException {
+        Message header = new Message(NetworkConstants.GAMEDATA, gameId);
+        Message data = new Message(type, message);
+        List<Message> dataToSend = new ArrayList<>();
+        dataToSend.add(header);
+        dataToSend.add(data);
+        dest.out.writeObject(dataToSend);
     }
-
 
 }

@@ -3,7 +3,7 @@ package network.messages;
 import java.io.Serializable;
 
 public class Message implements Serializable {
-    private final char type;
+    private final int type;
     private final String msg;
 
     public Message(char type, String msg) {
@@ -11,7 +11,7 @@ public class Message implements Serializable {
         this.msg = msg;
     }
 
-    public char getType() {
+    public int getType() {
         return type;
     }
 

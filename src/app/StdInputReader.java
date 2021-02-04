@@ -3,14 +3,13 @@ package app;
 import java.util.Arrays;
 import java.util.Scanner;
 
-public class InputReader {
-	static Scanner sc = new Scanner(System.in);
-
-	public String login() {
+public class StdInputReader {
+	private static final Scanner sc = new Scanner(System.in);
+	public static String loopedInput(String prompt, String... accepted) {
 		while (true) {
-			System.out.println("Server[s]/Client[c]/Quit[q]");
+			System.out.println(prompt);
 			String option = sc.nextLine();
-			if (Arrays.asList(new String[] { "s", "c", "q" }).contains(option)) {
+			if (Arrays.asList(accepted).contains(option)) {
 				return option;
 			}
 		}
