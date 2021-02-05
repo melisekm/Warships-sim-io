@@ -12,7 +12,6 @@ import network.nodes.Server;
 public class Main {
 
     public static void main(String[] args) {
-        System.out.println(args[2]);
         URL whatismyip = null;
         try {
             whatismyip = new URL("http://checkip.amazonaws.com");

@@ -1,1 +1,1 @@
-worker: sh target/bin/worker online server $PORT
+web: java -jar target/Warships-sim-io-1.0-SNAPSHOT.jar online server $PORT
