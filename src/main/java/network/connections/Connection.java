@@ -35,18 +35,18 @@ public abstract class Connection implements Runnable {
             try {
                 this.handleConnection();
             } catch (IOException e) {
-                //e.printStackTrace();
+                e.printStackTrace();
                 System.out.println("Socket bol uzatvoreny./Pripadne ina chyba:D");
                 break;
             } catch (ClassNotFoundException e) {
-                //e.printStackTrace();
+                e.printStackTrace();
             }
         }
         try { // loop bol breaknuty alebo niekto ukoncil spojenie ukoncil spojenie
             System.out.println("Zatvaram spojenie.");
             this.closeConnection();
         } catch (IOException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
     }
 

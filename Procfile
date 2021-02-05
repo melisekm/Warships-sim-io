@@ -1,0 +1,1 @@
+worker: sh target/bin/worker online server 9999

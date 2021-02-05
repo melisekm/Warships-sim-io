@@ -19,7 +19,7 @@ public class IOHandler {
             sc.close();
         } catch (FileNotFoundException e) {
             System.out.println("Subor nenajdeny.");
-            //e.printStackTrace();
+            e.printStackTrace();
         }
         return res.toString();
     }

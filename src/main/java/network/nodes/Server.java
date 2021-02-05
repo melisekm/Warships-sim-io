@@ -37,7 +37,7 @@ public class Server extends Node {
             try {
                 con.closeConnection();
             } catch (IOException e) {
-                //e.printStackTrace();
+                e.printStackTrace();
                 System.out.println("Nepodarilo sa uzatvorit spojenie s " + con.getSocket().toString());
             }
         }
@@ -53,7 +53,7 @@ public class Server extends Node {
                 Socket client = this.serverSocket.accept(); // klient sa pripojil
                 this.initClient(client); // vytvor spojenie a cakaj na board
             } catch (IOException e) {
-                //e.printStackTrace();
+                e.printStackTrace();
             }
         }
     }

@@ -30,9 +30,9 @@ public class Main {
             }
         } catch (UnknownHostException e) {
             System.out.println("Nespravne zadana IP.");
-            //e.printStackTrace();
+            e.printStackTrace();
         } catch (IOException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
 
     }
