@@ -1,1 +1,1 @@
-worker: sh target/bin/worker online server 9999
+worker: sh target/bin/worker online server $PORT
