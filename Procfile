@@ -1,1 +1,0 @@
-web: java -jar target/Warships-sim-io-1.0-SNAPSHOT.jar online server $PORT
