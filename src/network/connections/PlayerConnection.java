@@ -30,13 +30,12 @@ public class PlayerConnection extends Connection {
                 break;
             case NetworkConstants.GAME_ID:
                 int code = this.parent.assignPlayerToGame(this, Integer.parseInt(recvdData));
-                if(code == 0) {
+                if (code == 0)
                     this.parent.sendSimpleMsg(this, NetworkConstants.REQ_BOARD, recvdData);
-                }else if (code == 1){
-                    this.parent.sendSimpleMsg(this, NetworkConstants.ERROR,"Hra neexistuje.");
-                }else if(code == 2){
-                    this.parent.sendSimpleMsg(this, NetworkConstants.ERROR,"Hra je plna.");
-                }
+                else if (code == 1)
+                    this.parent.sendSimpleMsg(this, NetworkConstants.ERROR, "Hra neexistuje.");
+                else if (code == 2)
+                    this.parent.sendSimpleMsg(this, NetworkConstants.ERROR, "Hra je plna.");
                 break;
             case NetworkConstants.CREATE_GAME:
                 String id = this.parent.createGame(this);

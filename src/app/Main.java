@@ -9,24 +9,30 @@ import network.nodes.Server;
 public class Main {
 
     public static void main(String[] args) {
-        String login = StdInputReader.loopedInput("Server[s]/Client[c]/Quit[q]", "s", "c", "q");
-        String ip = "localhost";
-        int port = 9999;
+        int signal = IOHandler.checkArgs(args);
+        if (signal > 0){
+            System.exit(signal);
+        }
+        String login = args[1];
+        int port;
         try {
-            if (login.equals("c")) {
+            if (login.equals("client")) {
+                String ip = StdInputReader.getInput("Zadajte ip: ");
+                port = Integer.parseInt(StdInputReader.getInput("Zadajte port: "));
                 Client client = new Client();
                 client.initConnection(ip, port);
                 client.executor.shutdown();
-            } else if (login.equals("s")) {
+            } else if (login.equals("server")) {
+                port = Integer.parseInt(args[2]);
                 Server server = new Server(port);
                 server.handleConnections();
                 server.executor.shutdown();
             }
         } catch (UnknownHostException e) {
             System.out.println("Nespravne zadana IP.");
-            e.printStackTrace();
+            //e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
 
     }

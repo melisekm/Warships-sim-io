@@ -85,7 +85,8 @@ public class Client extends Node {
     }
 
     public String loadBoard() {
-        String location = "C:\\Users\\melis\\Desktop\\Eclipse workspace\\Warships-sim-io\\test_board\\board1.txt";
+        String location = "board.txt";
+        //String location = "C:\\Users\\melis\\Desktop\\Eclipse workspace\\Warships-sim-io\\test_board\\board1.txt";
         return this.io.readBoard(location);
     }
 
