@@ -25,7 +25,8 @@ public class Game implements Serializable {
     }
 
     public int performAttack(String origin, String destination, String coordinates) {
-        System.out.println(origin + " vystrelil na " + destination + " koordinaty: " + coordinates);
+        System.out.printf("Hra %d\n", this.id);
+        System.out.printf("%s vystrelil na %s koordinaty %s.\n", origin, destination, coordinates);
         //TODO do stuff
         //update stuff
         return GameConstants.HIT;

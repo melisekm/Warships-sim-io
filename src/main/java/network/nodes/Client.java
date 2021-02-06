@@ -29,9 +29,10 @@ public class Client extends Node {
         this.executor.execute(serverConnection); // vytvori thread a spusti run metodu
         this.initGame();
     }
+
     public void initGame() throws IOException {
         String prompt = "Vytvorit hru[v] / Pripojit sa k hre[p] / Quit[q]";
-        String option = StdInputReader.loopedInput(prompt,"p","v","q");
+        String option = StdInputReader.loopedInput(prompt, "p", "v", "q");
         switch (option) {
             case "p":
                 this.sendSimpleMsg(this.serverConnection, NetworkConstants.REQ_GAMELIST, "");
@@ -40,7 +41,7 @@ public class Client extends Node {
                 this.sendSimpleMsg(this.serverConnection, NetworkConstants.CREATE_GAME, "");
                 break;
             case "q":
-                this.serverConnection.closeConnection();
+                this.serverConnection.closeSocket();
                 break;
         }
 
@@ -62,11 +63,15 @@ public class Client extends Node {
 
     public int getGameId(String[] gameIds) {
         while (true) {
-            int gameId = Integer.parseInt(StdInputReader.getInput("Zadajte id hry."));
-            for (String id : gameIds) {
-                if (id.equals(String.valueOf(gameId))) {
-                    return gameId;
+            try {
+                int gameId = Integer.parseInt(StdInputReader.getInput("Zadajte id hry."));
+                for (String id : gameIds) {
+                    if (id.equals(String.valueOf(gameId))) {
+                        return gameId;
+                    }
                 }
+            } catch (NumberFormatException e) {
+                System.out.println("Musi to byt cislo.");
             }
         }
     }
@@ -85,17 +90,16 @@ public class Client extends Node {
     }
 
     public String loadBoard() {
-        String location = "board.txt";
-        //String location = "C:\\Users\\melis\\Desktop\\Eclipse workspace\\Warships-sim-io\\test_board\\board1.txt";
+        String location = "board\\board.txt";
         return this.io.readBoard(location);
     }
 
-    public String performAction(){
+    public String performAction() {
         return StdInputReader.getInput("Zadajte Suradnice Utoku");
     }
 
-    public void gameStateUpdate(int type, String gameData){
-        switch(type){
+    public void gameStateUpdate(int type, String gameData) {
+        switch (type) {
             case GameConstants.TARGET_HIT:
                 break;
             case GameConstants.SHIP_HIT:

@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -32,10 +33,12 @@ public class Server extends Node {
             System.out.println("Vypinam server");
         }));
     }
-    public void closeAllConections(){
-        for(PlayerConnection con : playerConnections){
+
+    public void closeAllConections() {
+        for (PlayerConnection con : playerConnections) {
             try {
-                con.closeConnection();
+                System.out.println("Zatvaram spojenie s hracom " + con.getPlayerIP());
+                con.closeSocket();
             } catch (IOException e) {
                 e.printStackTrace();
                 System.out.println("Nepodarilo sa uzatvorit spojenie s " + con.getSocket().toString());
@@ -65,6 +68,42 @@ public class Server extends Node {
         this.executor.execute(newPlayer); // vytvori thread a spusti run metodu
     }
 
+    public void closeConnection(PlayerConnection p) throws IOException {
+        String ip = p.getPlayerIP();
+        int playerId = 0;
+        Game game = null;
+        ArrayList<PlayerConnection> players = null;
+        // zisti o akeho hraca ide.
+        for (Map.Entry<Game, ArrayList<PlayerConnection>> entry : connections.entrySet()) {
+            game = entry.getKey();
+            players = entry.getValue();
+            if (players.get(0) == p) {
+                playerId = 1;
+                break;
+            } else if (players.get(1) == p) {
+                playerId = 2;
+                break;
+            }
+        }
+
+        if (playerId > 0) {
+            // posli spravu druhemu hracovi
+            System.out.println("Spojenie s hracom " + playerId + " v hre " + game.getId() + " prerusene.");
+            game.setPlayersConnected(game.getPlayersConnected() - 1);
+            players.remove(p);
+            if (game.getPlayersConnected() > 0)
+                this.sendSimpleMsg(players.get(0), NetworkConstants.ERROR, "Vas protihrac sa odpojil.");
+            //vymaz hru zo zoznamov
+            this.connections.remove(game);
+            this.games.remove(game.getId());
+        } else {
+            System.out.println("Spojenie s hracom z IP: " + ip + " prerusene. Hrac nebol pripojeny k ziadnej hre.");
+        }
+        // odstran pripojenie hraca.
+        this.playerConnections.remove(p);
+
+    }
+
     public String getFormattedGameList() {
         StringBuilder msg = new StringBuilder();
         for (Game game : this.games.values()) {
@@ -75,11 +114,11 @@ public class Server extends Node {
 
     public int assignPlayerToGame(PlayerConnection p, int gameId) {
         Game game = this.games.get(gameId);
-        if(game == null){
+        if (game == null) {
             System.out.println("hra s id " + gameId + " neexistuje.");
             return 1;
         }
-        if (game.getPlayersConnected() >= 2){
+        if (game.getPlayersConnected() >= 2) {
             System.out.println("hra " + gameId + " je plna.");
             return 2;
         }
@@ -105,6 +144,10 @@ public class Server extends Node {
     public void gameStateUpdate(PlayerConnection p, int gameId, int type, String gameData) throws IOException {
         Game game = this.games.get(gameId);
         ArrayList<PlayerConnection> players = this.connections.get(game);
+        if(players == null || !(players.contains(p))){
+            System.out.printf("Chyba. Hrac %s nie je sucastou tejto hry.\n", p.getPlayerIP());
+            return;
+        }
         if (game == null) {
             System.out.println("Hra s id " + gameId + " neexistuje.");
             return;
@@ -151,7 +194,7 @@ public class Server extends Node {
         if (players.size() == 1) {
             this.sendSimpleMsg(players.get(0), NetworkConstants.INFO, "Server obdrzal board. Ste hrac 1, prosim cakajte.");
         } else {
-            this.sendSimpleMsg(players.get(1), NetworkConstants.INFO, "Hra spustena.Server obdrzal board.");
+            this.sendSimpleMsg(players.get(1), NetworkConstants.INFO, "Hra spustena.Server obdrzal board. Cakajte.");
             this.sendSimpleMsg(players.get(0), NetworkConstants.REQ_ACTION, "Pripojil sa druhy hrac. Hra spustena.");
         }
     }

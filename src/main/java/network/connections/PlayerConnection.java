@@ -17,7 +17,7 @@ public class PlayerConnection extends Connection {
     }
 
     public void handleConnection() throws IOException, ClassNotFoundException {
-        List<Message> recvdList = super.unpackMsg();
+        List<Message> recvdList = super.unpackMsg(this.parent);
         int type = recvdList.get(0).getType();
         String recvdData = recvdList.get(0).getMsg();
         switch (type) {

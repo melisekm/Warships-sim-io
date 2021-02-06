@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import java.net.Socket;
-import java.net.SocketException;
+import java.net.*;
 import java.util.List;
 
 import network.messages.Message;
+import network.nodes.Server;
 
 public abstract class Connection implements Runnable {
     private Socket socket;
@@ -44,19 +44,33 @@ public abstract class Connection implements Runnable {
         }
         try { // loop bol breaknuty alebo niekto ukoncil spojenie ukoncil spojenie
             System.out.println("Zatvaram spojenie.");
-            this.closeConnection();
+            this.closeSocket();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    public String getPlayerIP() {
+        InetSocketAddress socketAddress = (InetSocketAddress) this.socket.getRemoteSocketAddress();
+        InetAddress inetAddress = ((InetSocketAddress) socketAddress).getAddress();
+        return inetAddress.toString();
+    }
+
     public abstract void handleConnection() throws IOException, ClassNotFoundException;
 
-    public List<Message> unpackMsg() throws IOException, ClassNotFoundException {
+    public List<Message> unpackMsg(Server server) throws ClassNotFoundException, IOException {
+        try {
+            return (List<Message>) this.in.readObject();
+        } catch (IOException e) {
+            server.closeConnection((PlayerConnection) this);
+            throw(e);
+        }
+    }
+    public List<Message> unpackMsg() throws ClassNotFoundException, IOException {
         return (List<Message>) this.in.readObject();
     }
 
-    public void closeConnection() throws IOException {
+    public void closeSocket() throws IOException {
         if (!this.socket.isClosed()) // ak este nebol zavrety tak ho zavrie
             this.socket.close();
     }

@@ -23,28 +23,4 @@ public class IOHandler {
         }
         return res.toString();
     }
-
-    public static int checkArgs(String[] args) {
-        int signal = 0;
-        if (args.length == 0) {
-            signal = 1;
-        } else {
-            if (!(args[0].equals("online") || args[1].equals("local"))) {
-                signal = 2;
-            }
-            if (args[1].equals("server") && args.length == 2) {
-                signal = 3;
-            } else if (!(args[1].equals("server") || args[1].equals("client"))) {
-                signal = 4;
-            }
-        }
-        if (signal > 0) {
-            printHelp();
-        }
-        return signal;
-    }
-
-    public static void printHelp() {
-        System.out.println("Usage: 'online'/'local' 'client'/'server' <port>");
-    }
 }
