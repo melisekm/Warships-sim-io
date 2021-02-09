@@ -51,10 +51,14 @@ public class ServerConnection extends Connection {
                 String recvdGameData = recvdList.get(1).getMsg();
                 this.parent.gameStateUpdate(recvdGameType, recvdGameData);
                 break;
-                // TODO v tychto case-och getnut tu suradnicu
-                //pre hraca na ktoreho sa striela aby to mohol aktualizovat
             case NetworkConstants.ERROR:
                 System.out.println(recvdData);
+                this.parent.initGame();
+                break;
+            case NetworkConstants.LOSE:
+            case NetworkConstants.WIN:
+                System.out.println(recvdData);
+                this.parent.closeGame();
                 this.parent.initGame();
                 break;
         }

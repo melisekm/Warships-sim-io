@@ -24,12 +24,20 @@ public class Game implements Serializable {
         }
     }
 
-    public int performAttack(String origin, String destination, String coordinates) {
-        System.out.printf("Hra %d\n", this.id);
-        System.out.printf("%s vystrelil na %s koordinaty %s.\n", origin, destination, coordinates);
-        //TODO do stuff
-        //update stuff
+    public int performAttack(String recvdCoordinates, Board boardToCheck) {
+        Coordinates coords = new Coordinates(recvdCoordinates);
+        if (boardToCheck.getGameBoard()[coords.getRow()][coords.getColumn()] == '#') {
+            return GameConstants.MISS;
+        }
+        boardToCheck.getGameBoard()[coords.getRow()][coords.getColumn()] = '#';
         return GameConstants.HIT;
+    }
+
+    public boolean checkEnd(){
+        if(this.p1Board.checkGameEnd() && this.p2Board.checkGameEnd()){
+            return true;
+        }
+        return false;
     }
 
     public Board getP1Board() {

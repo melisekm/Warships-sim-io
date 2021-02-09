@@ -7,20 +7,16 @@ import java.util.Scanner;
 public class IOHandler {
     Scanner sc;
 
-    public String readBoard(String location) {
+    public String readBoard(String location) throws FileNotFoundException {
         StringBuilder res = new StringBuilder();
         File boardTxt = new File(location);
-        try {
-            this.sc = new Scanner(boardTxt);
+        this.sc = new Scanner(boardTxt);
 
-            while (sc.hasNextLine()) {
-                res.append(sc.nextLine()).append("\n");
-            }
-            sc.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("Subor nenajdeny.");
-            e.printStackTrace();
+        while (sc.hasNextLine()) {
+            res.append(sc.nextLine()).append("\n");
         }
+        sc.close();
+
         return res.toString();
     }
 }

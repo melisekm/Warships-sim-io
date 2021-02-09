@@ -5,15 +5,25 @@ import network.nodes.Server;
 import network.messages.Message;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.List;
 
 public class PlayerConnection extends Connection {
-    Server parent;
+    private final Server parent;
+    private String IpAddress;
 
     public PlayerConnection(Server parent, Socket socket) throws IOException {
         super(socket);
         this.parent = parent;
+        this.IpAddress = this.getPlayerIP(socket);
+    }
+
+    private String getPlayerIP(Socket socket) {
+        InetSocketAddress socketAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
+        InetAddress inetAddress = ((InetSocketAddress) socketAddress).getAddress();
+        return inetAddress.toString();
     }
 
     public void handleConnection() throws IOException, ClassNotFoundException {
@@ -50,5 +60,13 @@ public class PlayerConnection extends Connection {
             default:
                 this.parent.sendSimpleMsg(this, NetworkConstants.ERROR, "Nasta neocakavana chyba, restartujte program.");
         }
+    }
+
+    public String getIpAddress() {
+        return IpAddress;
+    }
+
+    public void setIpAddress(String ipAddress) {
+        IpAddress = ipAddress;
     }
 }

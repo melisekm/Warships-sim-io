@@ -9,6 +9,9 @@ public class NetworkConstants {
 	public final static int REQ_BOARD = 6;
 	public final static int GAMEDATA = 7;
 	public final static int REQ_ACTION = 8;
+	public final static int WIN = 9;
+	public final static int LOSE = 10;
+
 	public final static int ERROR = 255;
 
 }

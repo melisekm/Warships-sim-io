@@ -7,7 +7,7 @@ public class Main {
         int signal = app.parseArgs(args);
         if (signal > 0) {
             app.printHelp();
-            System.exit(signal);
+            System.exit(signal);//TODO signals can be made to constants.
         }
         app.run();
     }

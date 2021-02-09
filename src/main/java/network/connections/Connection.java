@@ -42,7 +42,7 @@ public abstract class Connection implements Runnable {
                 e.printStackTrace();
             }
         }
-        try { // loop bol breaknuty alebo niekto ukoncil spojenie ukoncil spojenie
+        try { // loop bol breaknuty alebo niekto ukoncil spojenie
             System.out.println("Zatvaram spojenie.");
             this.closeSocket();
         } catch (IOException e) {
@@ -50,19 +50,14 @@ public abstract class Connection implements Runnable {
         }
     }
 
-    public String getPlayerIP() {
-        InetSocketAddress socketAddress = (InetSocketAddress) this.socket.getRemoteSocketAddress();
-        InetAddress inetAddress = ((InetSocketAddress) socketAddress).getAddress();
-        return inetAddress.toString();
-    }
 
     public abstract void handleConnection() throws IOException, ClassNotFoundException;
 
     public List<Message> unpackMsg(Server server) throws ClassNotFoundException, IOException {
         try {
             return (List<Message>) this.in.readObject();
-        } catch (IOException e) {
-            server.closeConnection((PlayerConnection) this);
+        } catch (IOException e) { //odpojil sa
+            server.removePlayer((PlayerConnection) this);
             throw(e);
         }
     }

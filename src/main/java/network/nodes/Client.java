@@ -1,22 +1,22 @@
 package network.nodes;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import app.StdInputReader;
 import constants.GameConstants;
 import game.Board;
+import game.Coordinates;
 import game.Game;
 import constants.NetworkConstants;
 import network.connections.Connection;
 import network.connections.ServerConnection;
 
 public class Client extends Node {
-    public ExecutorService executor = Executors.newCachedThreadPool();
     private Connection serverConnection;
     private Game game;
+    private String lastAttack;
 
     public Client() {
         System.out.println("Som Client");
@@ -77,38 +77,84 @@ public class Client extends Node {
     }
 
     public String createGame(int id) {
-        // TODO vyplnit suradnice lodi
-        //System.out.println("Vyplnte hraciu plochu lodami");
-        System.out.println("nacitavam zo suboru.");
+        String loadedBoard = null;
+        while (loadedBoard == null) {
+            loadedBoard = this.getBoardFromPlayer();
+        }
         this.game = new Game(id);
-        String loadedBoard = this.loadBoard();
         Board playerBoard = new Board(loadedBoard);
+        System.out.println(playerBoard.getFormattedBoard());
         this.game.setP1Board(playerBoard);
-        this.game.setP2Board(new Board(5, 5));
+        this.game.setP2Board(new Board(8, 8));
         return loadedBoard;
-
     }
 
-    public String loadBoard() {
+    // returns false on fail.
+    private String getBoardFromPlayer() {
+        String loadedBoard = null;
+        String option = StdInputReader.loopedInput("Chcete nacitat board zo suboru?", "y", "n");
+        if (option.equals("y")) {
+            while (loadedBoard == null) {
+                try {
+                    loadedBoard = this.loadBoard();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    System.out.println("Subor nenajdeny. Vytvorte ho.");
+                    option = StdInputReader.loopedInput("Skusit znovu?.", "y", "n");
+                    if (option.equals("n")) {
+                        break;
+                    }
+                }
+            }
+            System.out.println("nacitavam zo suboru. ./board/board.txt");
+        } else {
+            System.out.println("Toto je konzolova appka nacitat sa da len zo suboru :).");
+        }
+        return loadedBoard;
+    }
+
+    public String loadBoard() throws FileNotFoundException {
         String location = "board\\board.txt";
         return this.io.readBoard(location);
     }
 
     public String performAction() {
-        return StdInputReader.getInput("Zadajte Suradnice Utoku");
+        Coordinates coordinates = new Coordinates();
+        while (true) {
+            String inputCoords = StdInputReader.getInput("Zadajte Suradnice Utoku. [A-H][1-8]");
+            coordinates.setFormattedCoordinates(inputCoords);
+            if (coordinates.validate()) {
+                break;
+            } else {
+                System.out.println("Nespravne koordinaty.");
+            }
+        }
+        this.lastAttack = coordinates.getFormattedCoordinates();
+        return coordinates.getFormattedCoordinates();
     }
 
     public void gameStateUpdate(int type, String gameData) {
+        Coordinates coords;
         switch (type) {
             case GameConstants.TARGET_HIT:
+                coords = new Coordinates(lastAttack);
+                this.game.getP2Board().getGameBoard()[coords.getRow()][coords.getColumn()] = 'X';
                 break;
             case GameConstants.SHIP_HIT:
+                coords = new Coordinates(lastAttack);
+                this.game.getP1Board().getGameBoard()[coords.getRow()][coords.getColumn()] = 'X';
                 break;
             case GameConstants.TARGET_MISS:
+                coords = new Coordinates(gameData);
+                this.game.getP2Board().getGameBoard()[coords.getRow()][coords.getColumn()] = 'O';
                 break;
             case GameConstants.SHIP_MISS:
                 break;
         }
+    }
+
+    public void closeGame(){
+        this.game = null;
     }
 
     public Game getGame() {
