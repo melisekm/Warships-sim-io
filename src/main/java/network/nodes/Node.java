@@ -14,6 +14,7 @@ import network.messages.Message;
 public abstract class Node {
     public ExecutorService executor = Executors.newCachedThreadPool();
     IOHandler io = new IOHandler();
+
     public void sendSimpleMsg(Connection dest, int type, String message) throws IOException {
         Message data = new Message(type, message);
         List<Message> dataToSend = new ArrayList<>();
@@ -29,5 +30,4 @@ public abstract class Node {
         dataToSend.add(data);
         dest.out.writeObject(dataToSend);
     }
-
 }

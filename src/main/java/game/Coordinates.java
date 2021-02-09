@@ -5,34 +5,30 @@ public class Coordinates {
     private int column;
     private String formattedCoordinates;
 
-    public Coordinates(){
+    public Coordinates() {
 
     }
-    public Coordinates(String coords){
-        this.row = coords.charAt(0) + 'A';
-        this.column = coords.charAt(1) + '1';
+
+    public Coordinates(String coords) {
+        this.row = coords.charAt(0) - 'A';
+        this.column = coords.charAt(1) - '1';
     }
-    public Coordinates(int row, int column){
+
+    public Coordinates(int row, int column) {
         this.row = row;
         this.column = column;
     }
 
-    public Boolean validate(){
+    public boolean validate() {
         char row = this.formattedCoordinates.charAt(0);
         char column = this.formattedCoordinates.charAt(1);
-        if ((row >= 'A' && row <= 'H') && (column >= '1' && column <= '8')) {
-            return false;
-        }
-        return true;
+        return (row >= 'A' && row <= 'H') && (column >= '1' && column <= '8');
     }
 
-    public Boolean validate(String inputCoords){
+    public Boolean validate(String inputCoords) {
         char row = inputCoords.charAt(0);
         char column = inputCoords.charAt(1);
-        if ((row >= 'A' && row <= 'H') && (column >= '1' && column <= '8')) {
-            return false;
-        }
-        return true;
+        return (row >= 'A' && row <= 'H') && (column >= '1' && column <= '8');
     }
 
     public int getRow() {

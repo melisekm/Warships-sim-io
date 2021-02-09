@@ -52,9 +52,6 @@ public class ServerConnection extends Connection {
                 this.parent.gameStateUpdate(recvdGameType, recvdGameData);
                 break;
             case NetworkConstants.ERROR:
-                System.out.println(recvdData);
-                this.parent.initGame();
-                break;
             case NetworkConstants.LOSE:
             case NetworkConstants.WIN:
                 System.out.println(recvdData);

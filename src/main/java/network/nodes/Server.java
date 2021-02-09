@@ -164,6 +164,7 @@ public class Server extends Node {
                 break;
             case GameConstants.ATTACK:
                 this.handleGameAttack(game, gameData, connectedPlayers, msgOrigin);
+                game.printBorads(true);
                 break;
         }
     }
@@ -172,7 +173,6 @@ public class Server extends Node {
                                            String formattedBoard,
                                            ArrayList<PlayerConnection> players
     ) throws IOException {
-        System.out.println(formattedBoard);
         game.setBoard(formattedBoard);
         if (players.size() == 1) {
             this.sendSimpleMsg(players.get(0), NetworkConstants.INFO, "Server obdrzal board. Ste hrac 1, prosim cakajte.");
@@ -217,8 +217,8 @@ public class Server extends Node {
         }
         boolean checkEnd = game.checkEnd();
         if (checkEnd) {
-            this.sendSimpleMsg(origPC, NetworkConstants.WIN, "Znicili ste vsetky nepriatelske lode.");
-            this.sendSimpleMsg(destPC, NetworkConstants.LOSE, "Vsetky Vase lode boli znicene.");
+            this.sendSimpleMsg(origPC, NetworkConstants.WIN, "Znicili ste vsetky nepriatelske lode.\nVyhrali ste.");
+            this.sendSimpleMsg(destPC, NetworkConstants.LOSE, "Vsetky Vase lode boli znicene.\nPrehrali ste.");
             this.removeGame(game);
         } else {
             this.sendSimpleMsg(destPC, NetworkConstants.REQ_ACTION, "Ste na rade.");

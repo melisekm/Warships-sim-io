@@ -46,7 +46,9 @@ public class Client extends Node {
         }
 
     }
-
+    //TODO Players connected zobrazit.
+    //TODO p1 zalozi hru neodosle board, ale vytvori sa hra na ktoru sa neda pripojit a ptm to padne.
+    // nezobrazit hru dokym neni poslany board.
     public String chooseGame(String gameList) {
         int gameId;
         if (gameList.isEmpty()) {
@@ -106,7 +108,6 @@ public class Client extends Node {
                     }
                 }
             }
-            System.out.println("nacitavam zo suboru. ./board/board.txt");
         } else {
             System.out.println("Toto je konzolova appka nacitat sa da len zo suboru :).");
         }
@@ -114,7 +115,10 @@ public class Client extends Node {
     }
 
     public String loadBoard() throws FileNotFoundException {
-        String location = "board\\board.txt";
+        String location = "board\\";
+        String name = StdInputReader.getInput("Zadajte cestu.");
+        location += name;
+        System.out.println("nacitavam zo suboru... " + location);
         return this.io.readBoard(location);
     }
 
@@ -141,7 +145,7 @@ public class Client extends Node {
                 this.game.getP2Board().getGameBoard()[coords.getRow()][coords.getColumn()] = 'X';
                 break;
             case GameConstants.SHIP_HIT:
-                coords = new Coordinates(lastAttack);
+                coords = new Coordinates(gameData);
                 this.game.getP1Board().getGameBoard()[coords.getRow()][coords.getColumn()] = 'X';
                 break;
             case GameConstants.TARGET_MISS:
@@ -151,6 +155,7 @@ public class Client extends Node {
             case GameConstants.SHIP_MISS:
                 break;
         }
+        this.game.printBorads(false);
     }
 
     public void closeGame(){

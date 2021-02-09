@@ -19,8 +19,10 @@ public class Game implements Serializable {
     public void setBoard(String formattedBoard) {
         if (this.playersConnected == 1) {
             this.p1Board = new Board(formattedBoard);
+            System.out.println(this.p1Board.getFormattedBoard());
         } else {
             this.p2Board = new Board(formattedBoard);
+            System.out.println(this.p1Board.getFormattedBoard());
         }
     }
 
@@ -33,11 +35,33 @@ public class Game implements Serializable {
         return GameConstants.HIT;
     }
 
-    public boolean checkEnd(){
-        if(this.p1Board.checkGameEnd() && this.p2Board.checkGameEnd()){
-            return true;
+    public void printBorads(boolean s) {
+        System.out.println("__________________________");
+        if(s) System.out.println("| P 2  BOARD||| P 1  BOARD|");
+        else System.out.println("|ENEMY BOARD|||YOUR  BOARD|");
+
+        System.out.println("|___________|||__________ |");
+        System.out.println("|  12345678 |||  12345678 |");
+        StringBuilder b = new StringBuilder();
+        char rowId = 'A';
+        for(int column = 0; column < GameConstants.GAME_SIZE; column++){
+            b.append("|").append(rowId).append(" ");
+            for (int row = 0; row < GameConstants.GAME_SIZE; row++){
+                b.append(this.p2Board.getGameBoard()[column][row]);
+            }
+            b.append(" |||");
+            b.append(rowId++).append(" ");
+            for (int row = 0; row < GameConstants.GAME_SIZE; row++){
+                b.append(this.p1Board.getGameBoard()[column][row]);
+            }
+            b.append(" |\n");
         }
-        return false;
+        b.append("|___________|||___________|");
+        System.out.println(b.toString());
+    }
+
+    public boolean checkEnd() {
+        return this.p1Board.checkGameEnd() || this.p2Board.checkGameEnd();
     }
 
     public Board getP1Board() {
