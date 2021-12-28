@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="Warships-sim-io:jar">
-    <output-path>$PROJECT_DIR$/classes/artifacts/Warships_sim_io_jar</output-path>
-    <root id="archive" name="Warships-sim-io.jar">
-      <element id="module-output" name="Warships-sim-io" />
-    </root>
-  </artifact>
-</component>
